@@ -1,0 +1,142 @@
+<div class="card">
+
+    <h5>Despesas - Gastos</h5>
+    <p-toast></p-toast>
+        <p-fieldset [legend]="msgTotalOuts" [toggleable]="true" class="line-height-3 m-0">
+
+
+                <div class="col-12">
+                    <div class="card px-6 py-6">
+                        <p-toast></p-toast>
+                        <p-toolbar styleClass="mb-4">
+                            <ng-template pTemplate="left">
+                                <div class="my-2">
+                                    <button pButton pRipple label="Adicionar" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
+                                    <button pButton pRipple label="Deletar" icon="pi pi-trash" class="p-button-danger" (click)="deleteSelectedOuts()" [disabled]="!selectedOuts || !selectedOuts.length"></button>
+                                </div>
+                            </ng-template>
+
+
+                        </p-toolbar>
+
+                        <p-table #dt [value]="outs" [columns]="cols" responsiveLayout="scroll" [rows]="10" [globalFilterFields]="['name','country.name','representative.name','status']" [paginator]="true" [rowsPerPageOptions]="[10,20,30]" [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} outs" [(selection)]="selectedOuts" selectionMode="multiple" [rowHover]="true" dataKey="id">
+                            <ng-template pTemplate="caption">
+                                <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+                                    <h5 class="m-0">Saídas no período</h5>
+                                    <span class="block mt-2 md:mt-0 p-input-icon-left">
+                                        <i class="pi pi-search"></i>
+                                        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..."  class="w-full sm:w-auto"/>
+                                    </span>
+                                </div>
+                            </ng-template>
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th style="width: 3rem">
+                                        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                                    </th>
+                                    <th pSortableColumn="name">Nome <p-sortIcon field="name"></p-sortIcon></th>
+                                    <th pSortableColumn="price">Valor <p-sortIcon field="price"></p-sortIcon></th>
+
+                                    <th></th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-out>
+                                <tr>
+                                    <td>
+                                        <p-tableCheckbox [value]="out"></p-tableCheckbox>
+                                    </td>
+
+                                    <td style="width:14%; min-width:10rem;">
+                                        <span class="p-column-title">Nome</span>
+                                        {{out.name}}
+                                    </td>
+
+                                    <td style="width:14%; min-width:8rem;">
+                                        <span class="p-column-title">Valor</span>
+                                        {{out.price | currency:'BRL'}}
+                                    </td>
+
+                                    <td>
+                                        <div class="flex">
+                                            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="editOut(out)"></button>
+                                            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deleteOut(out)"></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+
+                    <p-dialog [(visible)]="outDialog" [style]="{width: '550px', height: '850px'}" header="Detalhes da Saídas" [modal]="true" class="p-fluid">
+                        <ng-template pTemplate="content">
+                            <div class="field">
+                                <label for="name">Nome</label>
+                                <input type="text" pInputText id="name" [(ngModel)]="out.name" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !out.name}"/>
+                                <small class="ng-dirty ng-invalid" *ngIf="submitted && !out.name">Nome is required.</small>
+                            </div>
+                            <div class="field">
+                                <label for="description">Descrição</label>
+                                <textarea id="description" pInputTextarea [(ngModel)]="out.description" required rows="3" cols="20"></textarea>
+                            </div>
+
+                            <div class="field">
+                                <label for="description">Data</label>
+                                <p-calendar dateFormat="dd.mm.yy" inputId="data" [(ngModel)]="out.data"></p-calendar>
+                            </div>
+
+                            <div class="field">
+                                <label class="mb-3">Categoria</label>
+                                <div class="formgrid grid">
+                                  <div class="field-radiobutton col-6" *ngFor="let categoria of categoriasGastos; let i = index">
+                                    <p-radioButton
+                                      [id]="categoria.id"
+                                      name="category"
+                                      [value]="categoria.id"
+                                      [(ngModel)]="out.category"
+                                    ></p-radioButton>
+                                    <label [for]="'category' + i">{{ categoria.name }}</label>
+                                  </div>
+                                </div>
+                            </div>
+
+                            <div class="formgrid grid">
+                                <div class="field col">
+                                    <label for="price">Valor</label>
+                                    <p-inputNumber id="price" [(ngModel)]="out.price" mode="currency" currency="BRL" locale="pt-BR"></p-inputNumber>
+                                </div>
+
+                            </div>
+                        </ng-template>
+
+                        <ng-template pTemplate="footer">
+                            <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+                            <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" (click)="saveOut()"></button>
+                        </ng-template>
+                    </p-dialog>
+
+                    <p-dialog [(visible)]="deleteOutDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
+                        <div class="flex align-items-center justify-content-center">
+                            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                            <span *ngIf="out">Tem certeza que deseja deletar esta entrada? <b>{{out.name}}</b>?</span>
+                        </div>
+                        <ng-template pTemplate="footer">
+                            <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="deleteOutDialog = false"></button>
+                            <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="confirmDelete()"></button>
+                        </ng-template>
+                    </p-dialog>
+
+                    <p-dialog [(visible)]="deleteOutsDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
+                        <div class="flex align-items-center justify-content-center">
+                            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                            <span>Deseja realmente deletar as entradas selecionadas?</span>
+                        </div>
+                        <ng-template pTemplate="footer">
+                            <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="deleteOutsDialog = false"></button>
+                            <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="confirmDeleteSelected()"></button>
+                        </ng-template>
+                    </p-dialog>
+                </div>
+        </p-fieldset>
+<!--
+        {{ outs | json }} -->
+</div>
