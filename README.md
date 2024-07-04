@@ -25,3 +25,11 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+
+Aplicação estática para consumo do mmc invest!!!
+
+## Instruções de Instalação
+- Abra o terminal do seu computador o o Nodejs 13 e Angular/Cli instalado
+- Clone o repositório para seu ambiente "git clone ..."
+- Execute o comando npm install para instalar o projeto
+- Execute o comando npm start para iniciar a aplicação
